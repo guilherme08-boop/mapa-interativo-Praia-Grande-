@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.412197,
+          -23.999567
+        ]
+      },
+      "properties": {
+        "id": "pda",
+        "titulo": "Palácio das Artes (PDA)",
+        "endereco": "Av. Pres. Costa e Silva, 1600 – Boqueirão",
+        "imagem": "https://turismo.praiagrande.sp.gov.br/wp-content/uploads/2021/05/palaciodasartes_foto_jairomarquestese.jpg",
+        "descricao": "Complexo cultural com Teatro Serafim Gonzalez, Galeria Nilton Zanotti e Biblioteca Municipal.",
+        "fonte": "Turismo Praia Grande – Palácio das Artes"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.417661,
+          -24.010683
+        ]
+      },
+      "properties": {
+        "id": "pracadapaz",
+        "titulo": "Praça da Paz",
+        "endereco": "Av. Brasil x Av. São Paulo – Guilhermina",
+        "imagem": "https://turismo.praiagrande.sp.gov.br/wp-content/uploads/2021/05/praca-da-paz-1-2.jpg",
+        "descricao": "Praça com esculturas monumentais de personalidades que representam a paz, obra de Gilmar Pinna.",
+        "fonte": "Turismo Praia Grande – Praça da Paz"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.404658,
+          -23.987647
+        ]
+      },
+      "properties": {
+        "id": "portinho",
+        "titulo": "Área de Lazer Ézio Dall’Acqua (Portinho)",
+        "endereco": "Rua Paulo Sérgio Garcia, s/nº – Sítio do Campo",
+        "imagem": "https://turismo.praiagrande.sp.gov.br/wp-content/uploads/2021/05/feira_artesanato_portinho_verao_09-02-19-11-scaled.jpg",
+        "descricao": "Parque com quiosques, deck de pesca, restaurante e museu ambiental.",
+        "fonte": "Turismo Praia Grande – Portinho"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -46.4150489,
+          -23.9975469
+        ]
+      },
+      "properties": {
+        "id": "parquedacidade",
+        "titulo": "Parque da Cidade",
+        "endereco": "Rua José Bonifácio, s/nº – Sítio do Campo (ao lado do Terminal Tude Bastos)",
+        "imagem": "https://turismo.praiagrande.sp.gov.br/wp-content/uploads/2021/05/parque-da-cidade-1-7.jpg",
+        "descricao": "Área ampla com museu, playgrounds, pistas e equipamentos de lazer.",
+        "fonte": "Turismo Praia Grande – Parque da Cidade"
+      }
+    }
+  ]
+}

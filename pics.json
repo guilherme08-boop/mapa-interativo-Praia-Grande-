@@ -1,0 +1,32 @@
+[
+  {
+    "id": "pic-melvi",
+    "titulo": "PIC Melvi",
+    "endereco": "Rua Heleni Rosa, 114, Praia Grande - SP",
+    "telefone": "(13) 3594-5056 / 3496-5064"
+  },
+  {
+    "id": "pic-vila-alice",
+    "titulo": "PIC Vila Alice",
+    "endereco": "Rua Renata Câmara Agondi, 50, Praia Grande - SP",
+    "telefone": "(13) 3471-2120 / 3496-5067"
+  },
+  {
+    "id": "pic-quietude",
+    "titulo": "PIC Quietude",
+    "endereco": "Rua Milton Daniels, s/n, Praia Grande - SP",
+    "telefone": "(13) 3496-5063"
+  },
+  {
+    "id": "pic-real",
+    "titulo": "PIC Real",
+    "endereco": "Av. Presidente Kennedy, 17483, Praia Grande - SP",
+    "telefone": "(13) 3473-6623"
+  },
+  {
+    "id": "pic-sitio-do-campo",
+    "titulo": "PIC Sítio do Campo",
+    "endereco": "Rua José Bonifácio, s/n, Praia Grande - SP",
+    "telefone": "(13) 3496-5065"
+  }
+]

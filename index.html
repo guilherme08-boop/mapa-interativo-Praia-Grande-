@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mapa Cultural de Praia Grande – Polos & PICs</title>
+
+  <!-- Mapbox GL & Geocoder -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
+  <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+
+  <style>
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#0b1020; color:#e6e8ef; }
+    #app { display:grid; grid-template-rows:auto 1fr; height:100%; }
+    header {
+      display:flex; align-items:center; gap:12px; padding:10px 16px; background:linear-gradient(90deg,#0b1020,#11193a);
+      position:sticky; top:0; z-index:10; border-bottom:1px solid #1f2748;
+    }
+    header h1 { font-size:18px; margin:0; letter-spacing:.2px; }
+    .badge { padding:4px 8px; border-radius:999px; font-size:12px; background:#1a234a; border:1px solid #2c3770; color:#b9c2ff; }
+    .controls { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .toggle { display:flex; gap:8px; align-items:center; background:#0f1530; border:1px solid #233066; padding:6px 10px; border-radius:10px; }
+    .toggle label { display:flex; gap:6px; align-items:center; font-size:13px; }
+    .toggle input { accent-color:#6aa3ff; }
+    #map { width:100%; height:100%; }
+    .mapboxgl-ctrl-geocoder { min-width:320px; }
+    .legend { position:absolute; bottom:12px; right:12px; background:#0f1530cc; border:1px solid #223066; padding:10px 12px; border-radius:12px; font-size:12px; backdrop-filter: blur(6px); }
+    .legend div { display:flex; align-items:center; gap:8px; margin:4px 0; }
+    .dot { width:12px; height:12px; border-radius:50%; display:inline-block; }
+    .dot.polo { background:#9d65ff; box-shadow:0 0 0 3px #9d65ff22; }
+    .dot.pic { background:#4ad6b8; box-shadow:0 0 0 3px #4ad6b822; }
+    .marker { width:14px; height:14px; border-radius:50%; border:2px solid white; box-shadow: 0 1px 6px #00000066; }
+    .marker.polo { background: radial-gradient( circle at 30% 30%, #d7c7ff, #9d65ff 60% ); }
+    .marker.pic { background: radial-gradient( circle at 30% 30%, #ccfff3, #4ad6b8 60% ); }
+    .popup { max-width: 320px; }
+    .popup h3 { margin: 0 0 4px; font-size: 16px; color: #eaf; }
+    .popup p { margin: 4px 0; font-size: 13px; color: #d7dbef; }
+    .popup img { width: 100%; height: auto; border-radius: 10px; border:1px solid #2c3770; }
+    .source { font-size: 11px; opacity: .8; margin-top: 6px; }
+    .foot { position:absolute; left:12px; bottom:12px; font-size:11px; color:#8e97bd; }
+    a { color:#9bc0ff; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <span class="badge">Praia Grande – SP</span>
+    <h1>Mapa Cultural: Polos & PICs</h1>
+    <div id="geocoder" style="margin-left:auto;"></div>
+    <div class="controls">
+      <div class="toggle">
+        <label><input type="checkbox" id="chkPolos" checked> <span>Polos culturais</span></label>
+        <label><input type="checkbox" id="chkPICs" checked> <span>PICs</span></label>
+        <label><input type="checkbox" id="chkCluster" checked> <span>Agrupar PICs</span></label>
+      </div>
+    </div>
+  </header>
+  <div id="map"></div>
+  <div class="legend">
+    <div><span class="dot polo"></span> Polos culturais / pontos turísticos</div>
+    <div><span class="dot pic"></span> PICs (Programa de Integração e Cidadania)</div>
+  </div>
+  <div class="foot">Fotos: Turismo Praia Grande (Prefeitura)</div>
+</div>
+
+<script>
+  // ========= CONFIG =========
+  const MAPBOX_TOKEN = "pk.eyJ1IjoiaXppc2hlaW5lY2tlIiwiYSI6ImNtZWhlNzU3dTA2cGYycW9jMHY3OXBuYmYifQ.QLPrbR7m88zFtNRWqZlVYg"; // seu token
+  const STYLE = "mapbox://styles/mapbox/light-v11";
+
+  mapboxgl.accessToken = MAPBOX_TOKEN;
+
+  // ========= MAPA =========
+  const map = new mapboxgl.Map({
+    container: "map",
+    style: STYLE,
+    center: [-46.412, -24.003], // Praia Grande
+    zoom: 12.4,
+    attributionControl: true
+  });
+
+  // Geocoder (busca de lugares/endereços)
+  const geocoder = new MapboxGeocoder({
+    accessToken: MAPBOX_TOKEN,
+    mapboxgl: mapboxgl,
+    marker: false,
+    placeholder: "Buscar endereço ou lugar…"
+  });
+  document.getElementById("geocoder").appendChild(geocoder.onAdd(map));
+
+  // ========= Fontes e camadas =========
+  map.on("load", async () => {
+    // Fonte e camada: Polos (GeoJSON local)
+    const polos = await fetch("data/polos.json").then(r => r.json());
+
+    map.addSource("polos", { type: "geojson", data: polos });
+    // Usaremos marcadores HTML para visuais mais bonitos:
+    addHtmlMarkers(polos.features, "polo");
+
+    // Fonte: PICs (endereços) – vamos geocodificar no cliente
+    const picsList = await fetch("data/pics.json").then(r => r.json());
+    const picsFeatures = await geocodePICs(picsList);
+    const picsGeoJSON = { type: "FeatureCollection", features: picsFeatures };
+
+    // Fonte PICs (para cluster)
+    map.addSource("pics", {
+      type: "geojson",
+      data: picsGeoJSON,
+      cluster: true,
+      clusterRadius: 40,
+      clusterMaxZoom: 14
+    });
+
+    // Camadas de cluster (bolhas)
+    map.addLayer({
+      id: "pics-clusters",
+      type: "circle",
+      source: "pics",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": "#4ad6b8",
+        "circle-opacity": 0.25,
+        "circle-stroke-color": "#0f1530",
+        "circle-stroke-width": 1.2,
+        "circle-radius": ["step", ["get", "point_count"], 14, 5, 19, 15, 24]
+      }
+    });
+    map.addLayer({
+      id: "pics-cluster-count",
+      type: "symbol",
+      source: "pics",
+      filter: ["has", "point_count"],
+      layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 12 },
+      paint: { "text-color": "#18353a" }
+    });
+
+    // Marcadores HTML individuais para PICs (quando não estiver usando cluster)
+    addHtmlMarkers(picsFeatures, "pic");
+
+    // Ajusta o mapa para mostrar tudo
+    const all = polos.features.concat(picsFeatures);
+    fitTo(all);
+
+    // Liga/desliga via checkboxes
+    const chkPolos = document.getElementById("chkPolos");
+    const chkPICs  = document.getElementById("chkPICs");
+    const chkCluster = document.getElementById("chkCluster");
+
+    chkPolos.addEventListener("change", () => toggleMarkers("polo", chkPolos.checked));
+    chkPICs.addEventListener("change", () => {
+      toggleMarkers("pic", chkPICs.checked);
+      map.setLayoutProperty("pics-clusters", "visibility", chkPICs.checked && chkCluster.checked ? "visible" : "none");
+      map.setLayoutProperty("pics-cluster-count", "visibility", chkPICs.checked && chkCluster.checked ? "visible" : "none");
+    });
+    chkCluster.addEventListener("change", () => {
+      const v = chkPICs.checked && chkCluster.checked ? "visible" : "none";
+      map.setLayoutProperty("pics-clusters", "visibility", v);
+      map.setLayoutProperty("pics-cluster-count", "visibility", v);
+    });
+  });
+
+  // ========= Utilitários =========
+  const allMarkers = []; // guardará os markers HTML para show/hide
+
+  function addHtmlMarkers(features, tipo) {
+    for (const f of features) {
+      const el = document.createElement("div");
+      el.className = "marker " + (tipo === "polo" ? "polo" : "pic");
+
+      const m = new mapboxgl.Marker(el)
+        .setLngLat(f.geometry.coordinates)
+        .setPopup(new mapboxgl.Popup({ offset: 16, maxWidth: "320px" }).setHTML(popupHTML(f.properties, tipo)))
+        .addTo(map);
+
+      allMarkers.push({ tipo, marker: m });
+    }
+  }
+
+  function popupHTML(props, tipo) {
+    const titulo = props.titulo || "(sem título)";
+    const endereco = props.endereco || "";
+    const telefone = props.telefone || "";
+    const img = props.imagem ? `<img loading="lazy" src="${props.imagem}" alt="${titulo}">` : "";
+    const desc = props.descricao ? `<p>${props.descricao}</p>` : "";
+    const fonte = props.fonte ? `<div class="source">Fonte: ${props.fonte}</div>` : "";
+
+    return `<div class="popup">
+      <h3>${titulo}</h3>
+      ${img}
+      ${desc}
+      <p>${endereco}${telefone ? "<br>Tel: " + telefone : ""}</p>
+      ${fonte}
+    </div>`;
+  }
+
+  function toggleMarkers(tipo, visible) {
+    for (const obj of allMarkers) {
+      if (obj.tipo === tipo) {
+        if (visible) obj.marker.addTo(map);
+        else obj.marker.remove();
+      }
+    }
+  }
+
+  function fitTo(features) {
+    const bounds = new mapboxgl.LngLatBounds();
+    for (const f of features) bounds.extend(f.geometry.coordinates);
+    if (!bounds.isEmpty()) map.fitBounds(bounds, { padding: 60, maxZoom: 15 });
+  }
+
+  async function geocodePICs(list) {
+    const out = [];
+    for (const item of list) {
+      try {
+        const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(item.endereco)}.json?access_token=${MAPBOX_TOKEN}&limit=1&country=br`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const feat = data?.features?.[0];
+        if (feat) {
+          out.push({
+            type: "Feature",
+            geometry: { type: "Point", coordinates: feat.center },
+            properties: {
+              id: item.id,
+              titulo: item.titulo,
+              endereco: item.endereco,
+              telefone: item.telefone,
+              descricao: "Unidade do Programa de Integração e Cidadania (PIC).",
+              fonte: "Prefeitura de Praia Grande – Unidades PIC"
+            }
+          });
+        } else {
+          console.warn("Endereço não localizado:", item);
+        }
+      } catch (e) {
+        console.error("Falha ao geocodificar", item, e);
+      }
+    }
+    return out;
+  }
+</script>
+</body>
+</html>
